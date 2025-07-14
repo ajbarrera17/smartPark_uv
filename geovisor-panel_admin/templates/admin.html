@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - SMARTPARK_UV</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-info i {
+            font-size: 1.5rem;
+            color: #3498db;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(52, 152, 219, 0.4);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            box-shadow: 0 10px 25px rgba(243, 156, 18, 0.3);
+        }
+
+        .stat-card.danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 10px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.3);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .parking-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .parking-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 2px solid #ecf0f1;
+            transition: all 0.3s ease;
+        }
+
+        .parking-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #3498db;
+        }
+
+        .parking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .parking-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .status-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.available {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .status-badge.limited {
+            background: #fef5e7;
+            color: #f39c12;
+        }
+
+        .status-badge.full {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+
+        .capacity-info {
+            margin-bottom: 20px;
+        }
+
+        .capacity-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .capacity-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .capacity-fill.low {
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+        }
+
+        .capacity-fill.medium {
+            background: linear-gradient(90deg, #f39c12, #e67e22);
+        }
+
+        .capacity-fill.high {
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+        }
+
+        .capacity-text {
+            display: flex;
+            justify-content: space-between;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .update-section {
+            border-top: 1px solid #ecf0f1;
+            padding-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9, #21618c);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+
+        .last-update {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #27ae60;
+        }
+
+        .notification.error {
+            background: #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .parking-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-car"></i> Smart Park UniValle</h1>
+            <p>Panel de Administración de Parqueaderos</p>
+            <div class="admin-info">
+                <i class="fas fa-user-shield"></i>
+                <div>
+                    <strong>Personal de Seguridad:</strong> <span id="adminName">Juan Pérez</span><br>
+                    <small>Última actualización: <span id="lastUpdate">--:--</span></small>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="stats-grid">
+                <div class="stat-card success">
+                    <i class="fas fa-car"></i>
+                    <h3 id="totalSpaces">0</h3>
+                    <p>Espacios Totales</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-circle"></i>
+                    <h3 id="availableSpaces">0</h3>
+                    <p>Espacios Disponibles</p>
+                </div>
+                <div class="stat-card warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3 id="occupiedSpaces">0</h3>
+                    <p>Espacios Ocupados</p>
+                </div>
+                <div class="stat-card danger">
+                    <i class="fas fa-percentage"></i>
+                    <h3 id="occupancyRate">0%</h3>
+                    <p>Tasa de Ocupación</p>
+                </div>
+            </div>
+
+            <div class="parking-grid" id="parkingGrid">
+                <!-- Los parqueaderos se cargarán dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Datos simulados de parqueaderos (en producción vendrían de una base de datos)
+        let parkingData = [];
+
+async function fetchData() {
+    try {
+        const res = await fetch('/admin/data');
+        parkingData = await res.json();
+        renderParkingCards();
+        updateStats();
+        updateLastUpdate();
+    } catch (e) {
+        showNotification('Error al cargar datos desde el servidor', 'error');
+    }
+}
+
+        function updateStats() {
+            const totalSpaces = parkingData.reduce((sum, parking) => sum + parking.capacidad, 0);
+            const occupiedSpaces = parkingData.reduce((sum, parking) => sum + parking.ocupados, 0);
+            const availableSpaces = totalSpaces - occupiedSpaces;
+            const occupancyRate = Math.round((occupiedSpaces / totalSpaces) * 100);
+
+            document.getElementById('totalSpaces').textContent = totalSpaces;
+            document.getElementById('availableSpaces').textContent = availableSpaces;
+            document.getElementById('occupiedSpaces').textContent = occupiedSpaces;
+            document.getElementById('occupancyRate').textContent = occupancyRate + '%';
+        }
+
+        function getStatusInfo(ocupados, capacidad) {
+            const percentage = (ocupados / capacidad) * 100;
+            if (percentage >= 90) {
+                return { class: 'full', text: 'Completo', fillClass: 'high' };
+            } else if (percentage >= 70) {
+                return { class: 'limited', text: 'Limitado', fillClass: 'medium' };
+            } else {
+                return { class: 'available', text: 'Disponible', fillClass: 'low' };
+            }
+        }
+
+        function renderParkingCards() {
+            const grid = document.getElementById('parkingGrid');
+            grid.innerHTML = '';
+
+            parkingData.forEach(parking => {
+                const available = parking.capacidad - parking.ocupados;
+                const percentage = (parking.ocupados / parking.capacidad) * 100;
+                const statusInfo = getStatusInfo(parking.ocupados, parking.capacidad);
+
+                const card = document.createElement('div');
+                card.className = 'parking-card';
+                card.innerHTML = `
+                    <div class="parking-header">
+                        <div class="parking-name">${parking.nombre}</div>
+                        <div class="status-badge ${statusInfo.class}">${statusInfo.text}</div>
+                    </div>
+                    
+                    <div class="capacity-info">
+                        <div class="capacity-bar">
+                            <div class="capacity-fill ${statusInfo.fillClass}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="capacity-text">
+                            <span>Ocupados: ${parking.ocupados}</span>
+                            <span>Disponibles: ${available}</span>
+                            <span>Total: ${parking.capacidad}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="update-section">
+                        <div class="form-group">
+                            <label for="occupied-${parking.id}">Espacios Ocupados:</label>
+                            <input type="number" id="occupied-${parking.id}" min="0" max="${parking.capacidad}" value="${parking.ocupados}">
+                        </div>
+                        <button class="btn btn-primary" onclick="updateParking(${parking.id})">
+                            <i class="fas fa-sync-alt"></i> Actualizar
+                        </button>
+                        <button class="btn btn-success" onclick="markAsEmpty(${parking.id})">
+                            <i class="fas fa-broom"></i> Marcar Vacío
+                        </button>
+                    </div>
+                    
+                    <div class="last-update">
+                        <i class="fas fa-clock"></i> 
+                        Última actualización: ${parking.lastUpdate || 'Nunca'}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function updateParking(id) {
+    const input = document.getElementById(`occupied-${id}`);
+    const newOccupied = parseInt(input.value);
+    const parking = parkingData.find(p => p.id === id);
+
+    if (newOccupied < 0 || newOccupied > parking.capacidad) {
+        showNotification('Error: Número de espacios ocupados inválido', 'error');
+        return;
+    }
+
+    try {
+        const res = await fetch('/admin/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id, ocupados: newOccupied })
+        });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+            parking.ocupados = newOccupied;
+            parking.lastUpdate = new Date().toLocaleTimeString();
+            renderParkingCards();
+            updateStats();
+            updateLastUpdate();
+            showNotification(`${parking.nombre} actualizado correctamente`, 'success');
+        } else {
+            showNotification('Error al actualizar: ' + result.message, 'error');
+        }
+    } catch (e) {
+        showNotification('Error al conectar con el servidor', 'error');
+    }
+}
+
+function markAsEmpty(id) {
+    document.getElementById(`occupied-${id}`).value = 0;
+    updateParking(id);
+}
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateLastUpdate() {
+            const now = new Date().toLocaleTimeString();
+            document.getElementById('lastUpdate').textContent = now;
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchData);
+
+        // Actualizar automáticamente cada 30 segundos (opcional)
+        setInterval(updateLastUpdate, 30000);
+    </script>
+</body>
+</html>
